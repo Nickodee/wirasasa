@@ -1,0 +1,31 @@
+{
+  "name": "WiraSasa",
+  "displayName": "WiraSasa",
+  "expo": {
+    "name": "WiraSasa",
+    "slug": "wirasasa",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/images/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#22c55e"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.wirasasa.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundColor": "#22c55e"
+      },
+      "package": "com.wirasasa.app"
+    }
+  }
+}
