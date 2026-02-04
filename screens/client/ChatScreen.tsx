@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
-  KeyboardAvoidingView,
   Platform,
   Image,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '../../constants/Theme';
@@ -145,9 +145,10 @@ export default function ChatScreen({ route, navigation }: any) {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <KeyboardAvoidingView 
       style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={0}
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -257,7 +258,7 @@ const styles = StyleSheet.create({
   },
   messagesList: {
     padding: Spacing.md,
-    paddingBottom: 100,
+    paddingBottom: Spacing.md,
   },
   messageContainer: {
     marginBottom: Spacing.md,
@@ -295,13 +296,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   inputContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
+    paddingBottom: 50,
     backgroundColor: Colors.white,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
