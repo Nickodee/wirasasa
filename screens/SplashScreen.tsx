@@ -75,13 +75,14 @@ export default function SplashScreen({ navigation }: any) {
       >
         <View style={styles.logoContainer}>
           <View style={styles.iconCircle}>
-            <Ionicons name="construct" size={48} color={Colors.white} />
+            <Ionicons name="hammer" size={56} color={Colors.white} />
           </View>
         </View>
         <Text style={styles.logo}>
           Wira<Text style={styles.logoAccent}>Sasa</Text>
         </Text>
-        <Text style={styles.tagline}>Find skilled professionals near you</Text>
+        <Text style={styles.tagline}>Find skilled workers nearby</Text>
+        <Text style={styles.subtitle}>Fast • Verified • Trusted</Text>
       </Animated.View>
     </View>
   );
@@ -101,28 +102,38 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   iconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: Colors.white + '20',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
+    borderWidth: 4,
     borderColor: Colors.white,
   },
   logo: {
     ...Typography.h1,
-    fontSize: 42,
+    fontSize: 48,
+    fontWeight: '800',
     color: Colors.white,
     marginBottom: 8,
+    letterSpacing: -1,
   },
   logoAccent: {
-    color: Colors.secondary,
+    color: Colors.white,
+    fontWeight: '300',
   },
   tagline: {
     ...Typography.body,
-    color: Colors.white + 'DD',
-    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontSize: 18,
+    marginBottom: 8,
+  },
+  subtitle: {
+    ...Typography.caption,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
+    letterSpacing: 2,
   },
 });
 

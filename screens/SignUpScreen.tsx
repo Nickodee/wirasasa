@@ -8,9 +8,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  BackHandler,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography } from '../constants/Theme';
+import { useFocusEffect } from '@react-navigation/native';
+import { Colors, Spacing, Typography, BorderRadius } from '../constants/Theme';
 
 export default function SignUpScreen({ navigation }: any) {
   const [formData, setFormData] = useState({
@@ -21,26 +23,57 @@ export default function SignUpScreen({ navigation }: any) {
     confirmPassword: '',
   });
 
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Handle Android back button
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.goBack();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => subscription.remove();
+    }, [navigation])
+  );
+
   const handleSignUp = () => {
     if (formData.password === formData.confirmPassword) {
       navigation.navigate('RoleSelection', { email: formData.email, password: formData.password });
     }
   };
 
+  const isFormValid = 
+    formData.name.trim().length > 0 &&
+    formData.email.trim().length > 0 &&
+    formData.phone.trim().length > 0 &&
+    formData.password.length >= 6 &&
+    formData.password === formData.confirmPassword;
+
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.content}>
+          {/* Back Button */}
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <Ionicons name="arrow-back" size={24} color={Colors.text} />
           </TouchableOpacity>
 
+          {/* Header */}
           <View style={styles.header}>
             <View style={styles.logoContainer}>
               <Text style={styles.logo}>
@@ -53,96 +86,204 @@ export default function SignUpScreen({ navigation }: any) {
             </Text>
           </View>
 
+          {/* Form */}
           <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Ionicons name="person" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Full Name"
-                placeholderTextColor={Colors.textSecondary}
-                value={formData.name}
-                onChangeText={(text) => setFormData({ ...formData, name: text })}
-              />
+            {/* Full Name Input */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Full Name</Text>
+              <View style={[
+                styles.inputWrapper,
+                focusedField === 'name' && styles.inputWrapperFocused
+              ]}>
+                <Ionicons 
+                  name="person-outline" 
+                  size={20} 
+                  color={focusedField === 'name' ? Colors.primary : Colors.textTertiary} 
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Enter your full name"
+                  placeholderTextColor={Colors.textTertiary}
+                  value={formData.name}
+                  onChangeText={(text) => setFormData({ ...formData, name: text })}
+                  onFocus={() => setFocusedField('name')}
+                  onBlur={() => setFocusedField(null)}
+                  autoCapitalize="words"
+                />
+              </View>
             </View>
 
-            <View style={styles.inputContainer}>
-              <Ionicons name="mail" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                placeholderTextColor={Colors.textSecondary}
-                value={formData.email}
-                onChangeText={(text) => setFormData({ ...formData, email: text })}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
+            {/* Email Input */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <View style={[
+                styles.inputWrapper,
+                focusedField === 'email' && styles.inputWrapperFocused
+              ]}>
+                <Ionicons 
+                  name="mail-outline" 
+                  size={20} 
+                  color={focusedField === 'email' ? Colors.primary : Colors.textTertiary} 
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="name@example.com"
+                  placeholderTextColor={Colors.textTertiary}
+                  value={formData.email}
+                  onChangeText={(text) => setFormData({ ...formData, email: text })}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField(null)}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
             </View>
 
-            <View style={styles.inputContainer}>
-              <Ionicons name="call" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Phone Number"
-                placeholderTextColor={Colors.textSecondary}
-                value={formData.phone}
-                onChangeText={(text) => setFormData({ ...formData, phone: text })}
-                keyboardType="phone-pad"
-              />
+            {/* Phone Input */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Phone Number</Text>
+              <View style={[
+                styles.inputWrapper,
+                focusedField === 'phone' && styles.inputWrapperFocused
+              ]}>
+                <Ionicons 
+                  name="call-outline" 
+                  size={20} 
+                  color={focusedField === 'phone' ? Colors.primary : Colors.textTertiary} 
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="+1 (555) 000-0000"
+                  placeholderTextColor={Colors.textTertiary}
+                  value={formData.phone}
+                  onChangeText={(text) => setFormData({ ...formData, phone: text })}
+                  onFocus={() => setFocusedField('phone')}
+                  onBlur={() => setFocusedField(null)}
+                  keyboardType="phone-pad"
+                />
+              </View>
             </View>
 
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor={Colors.textSecondary}
-                value={formData.password}
-                onChangeText={(text) => setFormData({ ...formData, password: text })}
-                secureTextEntry
-              />
+            {/* Password Input */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Password</Text>
+              <View style={[
+                styles.inputWrapper,
+                focusedField === 'password' && styles.inputWrapperFocused
+              ]}>
+                <Ionicons 
+                  name="lock-closed-outline" 
+                  size={20} 
+                  color={focusedField === 'password' ? Colors.primary : Colors.textTertiary} 
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Minimum 6 characters"
+                  placeholderTextColor={Colors.textTertiary}
+                  value={formData.password}
+                  onChangeText={(text) => setFormData({ ...formData, password: text })}
+                  onFocus={() => setFocusedField('password')}
+                  onBlur={() => setFocusedField(null)}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  style={styles.eyeIcon}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                    size={20}
+                    color={Colors.textTertiary}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm Password"
-                placeholderTextColor={Colors.textSecondary}
-                value={formData.confirmPassword}
-                onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
-                secureTextEntry
-              />
+            {/* Confirm Password Input */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Confirm Password</Text>
+              <View style={[
+                styles.inputWrapper,
+                focusedField === 'confirmPassword' && styles.inputWrapperFocused
+              ]}>
+                <Ionicons 
+                  name="lock-closed-outline" 
+                  size={20} 
+                  color={focusedField === 'confirmPassword' ? Colors.primary : Colors.textTertiary} 
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Re-enter your password"
+                  placeholderTextColor={Colors.textTertiary}
+                  value={formData.confirmPassword}
+                  onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
+                  onFocus={() => setFocusedField('confirmPassword')}
+                  onBlur={() => setFocusedField(null)}
+                  secureTextEntry={!showConfirmPassword}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  style={styles.eyeIcon}
+                >
+                  <Ionicons
+                    name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
+                    size={20}
+                    color={Colors.textTertiary}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
+            {/* Create Account Button */}
             <TouchableOpacity
-              style={[styles.button, (!formData.name || !formData.email || !formData.password) && styles.buttonDisabled]}
+              style={[
+                styles.signUpButton,
+                !isFormValid && styles.signUpButtonDisabled
+              ]}
               onPress={handleSignUp}
-              disabled={!formData.name || !formData.email || !formData.password}
+              disabled={!isFormValid}
+              activeOpacity={0.8}
             >
-              <Text style={styles.buttonText}>Create Account</Text>
+              <Text style={styles.signUpButtonText}>Create Account</Text>
+              <Ionicons name="arrow-forward" size={20} color={Colors.white} />
             </TouchableOpacity>
 
+            {/* Divider */}
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
               <Text style={styles.dividerText}>OR</Text>
               <View style={styles.dividerLine} />
             </View>
 
+            {/* Social Login */}
             <TouchableOpacity
               style={styles.socialButton}
+              activeOpacity={0.7}
             >
               <Ionicons name="logo-google" size={20} color={Colors.text} />
               <Text style={styles.socialButtonText}>Continue with Google</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.loginLink}
-              onPress={() => navigation.navigate('Login')}
-            >
-              <Text style={styles.loginLinkText}>
-                Already have an account? <Text style={styles.loginLinkBold}>Sign In</Text>
-              </Text>
-            </TouchableOpacity>
+            {/* Sign In Link */}
+            <View style={styles.signInContainer}>
+              <Text style={styles.signInText}>Already have an account? </Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Login')}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Text style={styles.signInLink}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -157,100 +298,119 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: Spacing.xxxl * 2,
   },
   content: {
     flex: 1,
-    padding: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
     justifyContent: 'center',
   },
+  
+  // Back Button
   backButton: {
     position: 'absolute',
-    top: 60,
-    left: Spacing.lg,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.white,
+    top: Platform.OS === 'ios' ? 50 : 30,
+    left: Spacing.xl,
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
     zIndex: 1,
   },
+  
+  // Header
   header: {
     alignItems: 'center',
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
     marginTop: 40,
   },
   logoContainer: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   logo: {
     ...Typography.h1,
     fontSize: 36,
+    fontWeight: '700',
   },
   logoAccent: {
     color: Colors.primary,
   },
   title: {
     ...Typography.h1,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
+    color: Colors.text,
   },
   subtitle: {
     ...Typography.body,
     color: Colors.textSecondary,
     textAlign: 'center',
   },
+  
+  // Form
   form: {
-    marginTop: Spacing.xl,
+    marginTop: Spacing.md,
   },
-  inputContainer: {
+  inputGroup: {
+    marginBottom: Spacing.base,
+  },
+  inputLabel: {
+    ...Typography.captionBold,
+    color: Colors.text,
+    marginBottom: Spacing.sm,
+  },
+  inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    borderWidth: 1,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1.5,
     borderColor: Colors.border,
-    marginBottom: Spacing.md,
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    paddingHorizontal: Spacing.base,
+    height: 56,
+  },
+  inputWrapperFocused: {
+    borderColor: Colors.primary,
+    borderWidth: 2,
   },
   inputIcon: {
-    marginLeft: Spacing.md,
+    marginRight: Spacing.md,
   },
-  input: {
+  textInput: {
     flex: 1,
-    padding: Spacing.md,
     ...Typography.body,
     color: Colors.text,
+    paddingVertical: 0,
+    fontSize: 16,
   },
-  button: {
+  eyeIcon: {
+    padding: Spacing.xs,
+  },
+  
+  // Sign Up Button
+  signUpButton: {
     backgroundColor: Colors.primary,
-    borderRadius: 16,
-    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    height: 56,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
     marginTop: Spacing.md,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
   },
-  buttonDisabled: {
-    backgroundColor: Colors.border,
-    shadowOpacity: 0,
-    elevation: 0,
+  signUpButtonDisabled: {
+    backgroundColor: Colors.textLight,
   },
-  buttonText: {
-    ...Typography.h3,
+  signUpButtonText: {
+    ...Typography.button,
     color: Colors.white,
   },
+  
+  // Divider
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -266,14 +426,16 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginHorizontal: Spacing.md,
   },
+  
+  // Social Button
   socialButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: Spacing.md,
-    borderWidth: 1,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.md,
+    height: 56,
+    borderWidth: 1.5,
     borderColor: Colors.border,
     gap: Spacing.sm,
   },
@@ -282,17 +444,23 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontWeight: '600',
   },
-  loginLink: {
-    marginTop: Spacing.lg,
+  
+  // Sign In Link
+  signInContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.xxxl,
+    paddingBottom: Spacing.xl,
   },
-  loginLinkText: {
+  signInText: {
     ...Typography.body,
     color: Colors.textSecondary,
   },
-  loginLinkBold: {
+  signInLink: {
+    ...Typography.button,
     color: Colors.primary,
-    fontWeight: '600',
   },
 });
 

@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 import { User, UserRole } from '../types';
+import LocationService from '../services/LocationService';
 
 interface AuthContextType {
   user: User | null;
@@ -48,6 +50,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRole(selectedRole);
     await AsyncStorage.setItem('user', JSON.stringify(mockUser));
     await AsyncStorage.setItem('role', selectedRole);
+
+    // Request location permission on first login
+    await requestLocationPermissionOnFirstLogin();
+  };
+
+  const requestLocationPermissionOnFirstLogin = async () => {
+    try {
+      // Check if location permission was already requested
+      const locationPermissionRequested = await AsyncStorage.getItem('locationPermissionRequested');
+      
+      if (locationPermissionRequested === 'true') {
+        // Already requested, just check if we have permission
+        const hasPermission = await LocationService.hasPermissions();
+        if (!hasPermission) {
+          // Permission was denied previously, don't ask again automatically
+          return;
+        }
+        return;
+      }
+
+      // First time login - request location permission
+      Alert.alert(
+        'Location Access',
+        'WiraSasa needs access to your location to help you find nearby service providers and improve your experience. Would you like to enable location services?',
+        [
+          {
+            text: 'Not Now',
+            style: 'cancel',
+            onPress: async () => {
+              await AsyncStorage.setItem('locationPermissionRequested', 'true');
+            },
+          },
+          {
+            text: 'Allow',
+            onPress: async () => {
+              const granted = await LocationService.requestPermissions();
+              await AsyncStorage.setItem('locationPermissionRequested', 'true');
+              
+              if (granted) {
+                // Get initial location
+                await LocationService.getCurrentLocation();
+              } else {
+                Alert.alert(
+                  'Location Permission Denied',
+                  'You can enable location access later in your device settings.',
+                  [{ text: 'OK' }]
+                );
+              }
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    } catch (error) {
+      console.error('Error requesting location permission on first login:', error);
+    }
   };
 
   const logout = async () => {

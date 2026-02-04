@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '../../constants/Theme';
@@ -21,7 +22,13 @@ export default function ReviewScreen({ route, navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
+
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
@@ -85,6 +92,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  scrollContent: {
+    paddingBottom: Spacing.xxxl,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -131,19 +141,14 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   commentInput: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 18,
     padding: Spacing.md,
     ...Typography.body,
     minHeight: 120,
     textAlignVertical: 'top',
     borderWidth: 1,
-    borderColor: Colors.border,
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    borderColor: Colors.borderLight,
   },
   submitButton: {
     backgroundColor: Colors.primary,

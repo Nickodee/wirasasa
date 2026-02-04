@@ -5,9 +5,11 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography } from '../../constants/Theme';
+import { Colors, Spacing, Typography, BorderRadius } from '../../constants/Theme';
 import { Job } from '../../types';
 
 const mockJobs: Job[] = [
@@ -54,37 +56,37 @@ const mockJobs: Job[] = [
 
 export default function ProviderJobHistoryScreen({ navigation }: any) {
   const renderJobItem = ({ item }: { item: Job }) => (
-    <TouchableOpacity style={styles.jobCard}>
+    <TouchableOpacity style={styles.jobCard} activeOpacity={0.7}>
       <View style={styles.jobHeader}>
         <View style={styles.serviceInfo}>
-          <Ionicons
-            name="car"
-            size={24}
-            color={Colors.primary}
-            style={styles.serviceIcon}
-          />
-          <View>
+          <View style={[styles.iconContainer, { backgroundColor: Colors.primarySoft }]}>
+            <Ionicons name="briefcase" size={20} color={Colors.primary} />
+          </View>
+          <View style={styles.serviceTextContainer}>
             <Text style={styles.serviceType}>{item.serviceType}</Text>
             <Text style={styles.jobDate}>
-              {new Date().toLocaleDateString()}
+              {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </Text>
           </View>
         </View>
         <View style={styles.completedBadge}>
-          <Text style={styles.completedText}>COMPLETED</Text>
+          <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
         </View>
       </View>
 
+      <View style={styles.divider} />
+
       <View style={styles.jobDetails}>
-        <View style={styles.locationRow}>
-          <Ionicons name="location" size={16} color={Colors.textSecondary} />
-          <Text style={styles.locationText}>{item.location.address}</Text>
+        <View style={styles.detailRow}>
+          <View style={styles.detailItem}>
+            <Ionicons name="location-outline" size={18} color={Colors.textSecondary} />
+            <Text style={styles.locationText} numberOfLines={1}>{item.location.address}</Text>
+          </View>
         </View>
-        <View style={styles.earningsRow}>
-          <Text style={styles.earningsLabel}>Earnings:</Text>
-          <Text style={styles.earningsValue}>
-            KES {item.estimatedEarnings}
-          </Text>
+        
+        <View style={styles.earningsContainer}>
+          <Text style={styles.earningsLabel}>Earnings</Text>
+          <Text style={styles.earningsValue}>KES {item.estimatedEarnings?.toLocaleString()}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -96,32 +98,33 @@ export default function ProviderJobHistoryScreen({ navigation }: any) {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>Job History</Text>
-          <Text style={styles.headerSubtitle}>View your completed jobs</Text>
-        </View>
-      </View>
-      <View style={styles.scrollContainer}>
-
-      <View style={styles.summaryCard}>
-        <Text style={styles.summaryLabel}>Total Earnings</Text>
-        <Text style={styles.summaryValue}>KES {totalEarnings.toLocaleString()}</Text>
-        <Text style={styles.summarySubtext}>
-          {mockJobs.length} completed jobs
-        </Text>
+        <Text style={styles.headerTitle}>Job History</Text>
+        <Text style={styles.headerSubtitle}>Your completed jobs</Text>
       </View>
 
-        <FlatList
-          data={mockJobs}
-          renderItem={renderJobItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
-    </View>
+      <FlatList
+        data={mockJobs}
+        renderItem={renderJobItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <View style={styles.summaryCard}>
+            <View style={styles.summaryIconContainer}>
+              <Ionicons name="wallet-outline" size={32} color={Colors.primary} />
+            </View>
+            <Text style={styles.summaryLabel}>Total Earnings</Text>
+            <Text style={styles.summaryValue}>KES {totalEarnings.toLocaleString()}</Text>
+            <View style={styles.summaryBadge}>
+              <Ionicons name="briefcase-outline" size={14} color={Colors.primary} />
+              <Text style={styles.summarySubtext}>{mockJobs.length} completed jobs</Text>
+            </View>
+          </View>
+        }
+      />
+    </SafeAreaView>
   );
 }
 
@@ -132,70 +135,83 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: Spacing.lg,
-    paddingTop: 60,
+    paddingTop: Spacing.sm,
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 1000,
-  },
-  scrollContainer: {
-    flex: 1,
-    marginTop: 140,
+    borderBottomColor: Colors.borderLight,
   },
   headerTitle: {
     ...Typography.h1,
-    marginBottom: Spacing.xs,
+    color: Colors.text,
+    fontWeight: '700',
+    marginBottom: Spacing.xxs,
   },
   headerSubtitle: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
-  },
-  summaryCard: {
-    backgroundColor: Colors.primary,
-    margin: Spacing.lg,
-    padding: Spacing.lg,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  summaryLabel: {
     ...Typography.body,
-    color: Colors.white,
-    opacity: 0.9,
-  },
-  summaryValue: {
-    ...Typography.h1,
-    color: Colors.white,
-    marginTop: Spacing.xs,
-    marginBottom: Spacing.xs,
-  },
-  summarySubtext: {
-    ...Typography.caption,
-    color: Colors.white,
-    opacity: 0.8,
+    color: Colors.textSecondary,
   },
   list: {
     padding: Spacing.lg,
-    paddingTop: 0,
+    paddingBottom: Platform.OS === 'ios' ? 150 : 130,
+  },
+  summaryCard: {
+    backgroundColor: Colors.white,
+    marginBottom: Spacing.lg,
+    padding: Spacing.xl,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  summaryIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primarySoft,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  summaryLabel: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: Spacing.xs,
+  },
+  summaryValue: {
+    ...Typography.h1,
+    color: Colors.primary,
+    fontWeight: '700',
+    fontSize: 36,
+    marginBottom: Spacing.sm,
+  },
+  summaryBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primarySoft,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.full,
+    gap: Spacing.xs,
+  },
+  summarySubtext: {
+    ...Typography.small,
+    color: Colors.primary,
+    fontWeight: '600',
   },
   jobCard: {
     backgroundColor: Colors.white,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.md,
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
   jobHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: Spacing.md,
   },
   serviceInfo: {
@@ -203,55 +219,77 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  serviceIcon: {
-    marginRight: Spacing.md,
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.sm,
+  },
+  serviceTextContainer: {
+    flex: 1,
   },
   serviceType: {
-    ...Typography.h3,
-    marginBottom: Spacing.xs,
+    ...Typography.body,
+    color: Colors.text,
+    fontWeight: '600',
+    marginBottom: 2,
   },
   jobDate: {
-    ...Typography.caption,
+    ...Typography.small,
     color: Colors.textSecondary,
   },
   completedBadge: {
-    backgroundColor: Colors.success + '20',
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 8,
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.successLight,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  completedText: {
-    ...Typography.small,
-    color: Colors.success,
-    fontWeight: '600',
+  divider: {
+    height: 1,
+    backgroundColor: Colors.borderLight,
+    marginBottom: Spacing.md,
   },
   jobDetails: {
-    marginTop: Spacing.sm,
+    gap: Spacing.sm,
   },
-  locationRow: {
+  detailRow: {
+    marginBottom: Spacing.xs,
+  },
+  detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    gap: Spacing.xs,
   },
   locationText: {
-    ...Typography.body,
+    ...Typography.caption,
     color: Colors.textSecondary,
-    marginLeft: Spacing.xs,
+    flex: 1,
   },
-  earningsRow: {
+  earningsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: Colors.primarySoft,
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.md,
     marginTop: Spacing.xs,
   },
   earningsLabel: {
     ...Typography.caption,
-    color: Colors.textSecondary,
+    color: Colors.primary,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   earningsValue: {
     ...Typography.body,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.primary,
+    fontSize: 16,
   },
 });
 

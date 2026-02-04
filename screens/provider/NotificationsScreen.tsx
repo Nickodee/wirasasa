@@ -171,11 +171,8 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.md,
     flexDirection: 'row',
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
   unreadCard: {
     backgroundColor: Colors.primary + '05',

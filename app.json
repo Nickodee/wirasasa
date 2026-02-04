@@ -6,9 +6,8 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#4CAF50"
+      "backgroundColor": "#4CAF50",
+      "resizeMode": "contain"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -21,8 +20,15 @@
       "package": "com.wirasasa.app",
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
-      ]
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyB8_AZmm8tIDqFmJ5IVFulgs3_jt3UgqfM"
+        }
+      }
     },
     "web": {},
     "plugins": [
@@ -32,7 +38,13 @@
           "locationAlwaysAndWhenInUsePermission": "Allow WiraSasa to use your location."
         }
       ],
+      "./app.plugin.js",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "26290fd9-7bc5-495a-9712-b268c32aa8c5"
+      }
+    }
   }
 }

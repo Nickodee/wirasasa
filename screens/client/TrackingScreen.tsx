@@ -79,7 +79,13 @@ export default function TrackingScreen({ route, navigation }: any) {
             coordinate={routeCoordinates[0]}
             title="Your Location"
           >
-            <View style={styles.destinationMarker} />
+            <View style={styles.currentLocationMarker}>
+              <View style={styles.currentLocationOuter}>
+                <View style={styles.currentLocationInner}>
+                  <Ionicons name="navigate" size={20} color={Colors.white} />
+                </View>
+              </View>
+            </View>
           </Marker>
           <Marker
             coordinate={routeCoordinates[routeCoordinates.length - 1]}
@@ -113,9 +119,6 @@ export default function TrackingScreen({ route, navigation }: any) {
           <View style={styles.providerDetails}>
             <Text style={styles.providerName}>{provider.name}</Text>
             <Text style={styles.providerProfession}>{provider.profession}</Text>
-          </View>
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>En Route</Text>
           </View>
         </View>
 
@@ -183,6 +186,31 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: Colors.white,
   },
+  currentLocationMarker: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  currentLocationOuter: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: Colors.primary + '30',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  currentLocationInner: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 5,
+  },
   providerMarker: {
     alignItems: 'center',
   },
@@ -232,17 +260,6 @@ const styles = StyleSheet.create({
   providerProfession: {
     ...Typography.caption,
     color: Colors.textSecondary,
-  },
-  statusBadge: {
-    backgroundColor: '#E8F5E9',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: 16,
-  },
-  statusText: {
-    ...Typography.caption,
-    color: Colors.primary,
-    fontWeight: '600',
   },
   etaCard: {
     flexDirection: 'row',

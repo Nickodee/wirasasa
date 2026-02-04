@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   Switch,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
@@ -33,7 +34,11 @@ export default function ProviderProfileScreen({ navigation }: any) {
         <Text style={styles.headerTitle}>Profile</Text>
         <View style={{ width: 24 }} />
       </View>
-      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollContent} 
+        contentContainerStyle={styles.scrollContentContainer}
+        showsVerticalScrollIndicator={false}
+      >
 
       <View style={styles.profileHeader}>
         <View style={styles.profileSection}>
@@ -226,6 +231,9 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 100,
   },
+  scrollContentContainer: {
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+  },
   headerTitle: {
     ...Typography.h2,
   },
@@ -323,6 +331,11 @@ const styles = StyleSheet.create({
   },
   settingContent: {
     flex: 1,
+  },
+  settingLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
   },
   settingLabel: {
     ...Typography.body,

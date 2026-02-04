@@ -1,24 +1,30 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  Modal,
-  Alert,
-} from 'react-native';
+import { StatusBar, View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, Modal, Alert, BackHandler, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import { Colors, Spacing, Typography } from '../../constants/Theme';
 import { ProfileImagePicker } from '../../components/ImagePicker';
+  // ...existing code...
 
 export default function ClientProfileScreen({ navigation }: any) {
   const { user, logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(
     user?.profileImage || `https://i.pravatar.cc/150?img=${user?.id || '1'}`
+  );
+
+  // Handle Android back button
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.goBack();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => subscription.remove();
+    }, [navigation])
   );
 
   const handleLogout = async () => {
@@ -32,14 +38,19 @@ export default function ClientProfileScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
+  <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
         <View style={{ width: 24 }} />
       </View>
-      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollContent} 
+        contentContainerStyle={styles.scrollContentContainer}
+        showsVerticalScrollIndicator={false}
+      >
 
       <View style={styles.profileHeader}>
         <View style={styles.profileSection}>
@@ -88,7 +99,7 @@ export default function ClientProfileScreen({ navigation }: any) {
 
         <TouchableOpacity
           style={styles.settingItem}
-          onPress={() => navigation.navigate('RequestsMain')}
+          onPress={() => navigation.navigate('MyRequests')}
         >
           <View style={[styles.settingIcon, { backgroundColor: Colors.secondary + '15' }]}>
             <Ionicons name="list" size={24} color={Colors.secondary} />
@@ -216,6 +227,9 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 100,
   },
+  scrollContentContainer: {
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+  },
   headerTitle: {
     ...Typography.h2,
   },
@@ -308,6 +322,11 @@ const styles = StyleSheet.create({
   },
   settingContent: {
     flex: 1,
+  },
+  settingLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
   },
   settingLabel: {
     ...Typography.body,

@@ -23,15 +23,17 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider, onPress })
           </View>
         )}
       </View>
-      <View style={styles.info}>
-        <Text style={styles.name}>{provider.name}</Text>
-        <View style={styles.ratingContainer}>
-          <Ionicons name="star" size={16} color="#FFD700" />
-          <Text style={styles.rating}>
-            {provider.rating} ({provider.jobsCompleted})
-          </Text>
+      <View style={styles.infoRow}>
+        <View style={styles.infoMain}>
+          <Text style={styles.name}>{provider.name}</Text>
+          <View style={styles.ratingContainer}>
+            <Ionicons name="star" size={16} color="#FFD700" />
+            <Text style={styles.rating}>
+              {provider.rating} ({provider.jobsCompleted})
+            </Text>
+          </View>
         </View>
-        <View style={styles.details}>
+        <View style={styles.infoMeta}>
           <Text style={styles.rate}>KSh {provider.hourlyRate}</Text>
           <Text style={styles.eta}>{provider.eta} min</Text>
         </View>
@@ -43,26 +45,24 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider, onPress })
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: Spacing.md,
-    marginRight: Spacing.md,
-    width: 200,
+    borderRadius: 10,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
     alignItems: 'center',
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    width: '100%',
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: Spacing.sm,
+    marginRight: Spacing.md,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1.5,
     borderColor: Colors.primary + '30',
   },
   verifiedBadge: {
@@ -78,19 +78,28 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.white,
   },
-  info: {
-    alignItems: 'center',
-    width: '100%',
+  infoRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  infoMain: {
+    flex: 1,
+    marginRight: Spacing.sm,
+  },
+  infoMeta: {
+    alignItems: 'flex-end',
   },
   name: {
-    ...Typography.h3,
-    marginBottom: Spacing.xs,
-    textAlign: 'center',
+    ...Typography.body,
+    fontWeight: '600',
+    marginBottom: Spacing.xxs,
+    textAlign: 'left',
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
   },
   rating: {
     ...Typography.caption,
@@ -99,9 +108,6 @@ const styles = StyleSheet.create({
   },
   details: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: Spacing.xs,
   },
   rate: {
     ...Typography.body,
@@ -111,6 +117,7 @@ const styles = StyleSheet.create({
   eta: {
     ...Typography.caption,
     color: Colors.textSecondary,
+    marginTop: 2,
   },
 });
 

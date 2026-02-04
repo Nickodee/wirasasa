@@ -7,75 +7,126 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Image,
+  ScrollView,
+  BackHandler,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography } from '../constants/Theme';
+import { useFocusEffect } from '@react-navigation/native';
+import { Colors, Spacing, Typography, BorderRadius } from '../constants/Theme';
 
 export default function ForgotPasswordScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
+  const [emailFocused, setEmailFocused] = useState(false);
+
+  // Handle Android back button
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.goBack();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => subscription.remove();
+    }, [navigation])
+  );
 
   const handleReset = () => {
     // Handle password reset
     navigation.navigate('Login');
   };
 
+  const isFormValid = email.trim().length > 0;
+
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}
     >
-      <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color={Colors.text} />
-        </TouchableOpacity>
-
-        <View style={styles.iconContainer}>
-          <View style={styles.iconCircle}>
-            <Ionicons name="lock-closed" size={48} color={Colors.primary} />
-          </View>
-        </View>
-
-        <Text style={styles.title}>Forgot Password?</Text>
-        <Text style={styles.subtitle}>
-          Don't worry! Enter your email and we'll send you a link to reset your password.
-        </Text>
-
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Ionicons name="mail" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email address"
-              placeholderTextColor={Colors.textSecondary}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.content}>
+          {/* Back Button */}
           <TouchableOpacity
-            style={[styles.button, !email && styles.buttonDisabled]}
-            onPress={handleReset}
-            disabled={!email}
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Text style={styles.buttonText}>Send Reset Link</Text>
+            <Ionicons name="arrow-back" size={24} color={Colors.text} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.backToLogin}
-            onPress={() => navigation.navigate('Login')}
-          >
-            <Text style={styles.backToLoginText}>
-              Remember your password? <Text style={styles.backToLoginLink}>Sign In</Text>
-            </Text>
-          </TouchableOpacity>
+          {/* Icon */}
+          <View style={styles.iconContainer}>
+            <View style={styles.iconCircle}>
+              <Ionicons name="lock-closed-outline" size={56} color={Colors.primary} />
+            </View>
+          </View>
+
+          {/* Header */}
+          <Text style={styles.title}>Forgot Password?</Text>
+          <Text style={styles.subtitle}>
+            No worries! Enter your email address and we'll send you instructions to reset your password.
+          </Text>
+
+          {/* Form */}
+          <View style={styles.form}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <View style={[
+                styles.inputWrapper,
+                emailFocused && styles.inputWrapperFocused
+              ]}>
+                <Ionicons 
+                  name="mail-outline" 
+                  size={20} 
+                  color={emailFocused ? Colors.primary : Colors.textTertiary} 
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="name@example.com"
+                  placeholderTextColor={Colors.textTertiary}
+                  value={email}
+                  onChangeText={setEmail}
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+            </View>
+
+            {/* Send Reset Link Button */}
+            <TouchableOpacity
+              style={[
+                styles.resetButton,
+                !isFormValid && styles.resetButtonDisabled
+              ]}
+              onPress={handleReset}
+              disabled={!isFormValid}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.resetButtonText}>Send Reset Link</Text>
+              <Ionicons name="mail-outline" size={20} color={Colors.white} />
+            </TouchableOpacity>
+
+            {/* Back to Login */}
+            <View style={styles.backToLoginContainer}>
+              <Text style={styles.backToLoginText}>Remember your password? </Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Login')}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Text style={styles.backToLoginLink}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -85,109 +136,131 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   content: {
     flex: 1,
-    padding: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+    paddingBottom: Spacing.xl,
     justifyContent: 'center',
   },
+  
+  // Back Button
   backButton: {
     position: 'absolute',
-    top: 60,
-    left: Spacing.lg,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.white,
+    top: Platform.OS === 'ios' ? 50 : 30,
+    left: Spacing.xl,
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
+  
+  // Icon Section
   iconContainer: {
     alignItems: 'center',
     marginBottom: Spacing.xl,
   },
   iconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: Colors.primary + '15',
+    width: 120,
+    height: 120,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primarySoft,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  
+  // Header Text
   title: {
     ...Typography.h1,
     textAlign: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
+    color: Colors.text,
   },
   subtitle: {
     ...Typography.body,
     textAlign: 'center',
     color: Colors.textSecondary,
     marginBottom: Spacing.xl,
-    lineHeight: 22,
+    lineHeight: 24,
+    paddingHorizontal: Spacing.md,
   },
+  
+  // Form
   form: {
-    marginTop: Spacing.xl,
+    marginTop: Spacing.lg,
   },
-  inputContainer: {
+  inputGroup: {
+    marginBottom: Spacing.xl,
+  },
+  inputLabel: {
+    ...Typography.captionBold,
+    color: Colors.text,
+    marginBottom: Spacing.sm,
+  },
+  inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    borderWidth: 1,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1.5,
     borderColor: Colors.border,
-    marginBottom: Spacing.md,
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    paddingHorizontal: Spacing.base,
+    height: 56,
+  },
+  inputWrapperFocused: {
+    borderColor: Colors.primary,
+    borderWidth: 2,
   },
   inputIcon: {
-    marginLeft: Spacing.md,
+    marginRight: Spacing.md,
   },
-  input: {
+  textInput: {
     flex: 1,
-    padding: Spacing.md,
     ...Typography.body,
     color: Colors.text,
+    paddingVertical: 0,
+    fontSize: 16,
   },
-  button: {
+  
+  // Button
+  resetButton: {
     backgroundColor: Colors.primary,
-    borderRadius: 16,
-    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    height: 56,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: Spacing.md,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    justifyContent: 'center',
+    gap: Spacing.sm,
   },
-  buttonDisabled: {
-    backgroundColor: Colors.border,
-    shadowOpacity: 0,
-    elevation: 0,
+  resetButtonDisabled: {
+    backgroundColor: Colors.textLight,
   },
-  buttonText: {
-    ...Typography.h3,
+  resetButtonText: {
+    ...Typography.button,
     color: Colors.white,
   },
-  backToLogin: {
-    marginTop: Spacing.lg,
+  
+  // Back to Login
+  backToLoginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    marginTop: Spacing.xl,
   },
   backToLoginText: {
     ...Typography.body,
     color: Colors.textSecondary,
   },
   backToLoginLink: {
+    ...Typography.button,
     color: Colors.primary,
-    fontWeight: '600',
   },
 });
 

@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography } from '../constants/Theme';
+import { Colors, Spacing, Typography, BorderRadius } from '../constants/Theme';
 
 interface ServiceCardProps {
   name: string;
@@ -10,67 +10,76 @@ interface ServiceCardProps {
   onPress: () => void;
 }
 
-const getGradientColor = (baseColor: string) => {
-  const colorMap: { [key: string]: string } = {
-    '#4CAF50': '#66BB6A',
-    '#2196F3': '#42A5F5',
-    '#FF9800': '#FFA726',
-  };
-  return colorMap[baseColor] || baseColor;
-};
-
 export const ServiceCard: React.FC<ServiceCardProps> = ({ name, icon, color, onPress }) => {
+  const [scaleValue] = useState(new Animated.Value(1));
+
+  const handlePressIn = () => {
+    Animated.spring(scaleValue, {
+      toValue: 0.95,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 4,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleValue, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 8,
+    }).start();
+  };
+
   return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View style={[styles.iconContainer, { backgroundColor: color + '15' }]}>
-        <View style={[styles.iconCircle, { backgroundColor: color }]}>
-          <Ionicons name={icon as any} size={28} color={Colors.white} />
+    <Animated.View style={[styles.cardWrapper, { transform: [{ scale: scaleValue }] }]}>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        activeOpacity={1}
+      >
+        <View style={[styles.iconContainer, { backgroundColor: color + '12' }]}>
+          <Ionicons name={icon as any} size={32} color={color} />
         </View>
-      </View>
-      <Text style={styles.name}>{name}</Text>
-    </TouchableOpacity>
+        <Text style={styles.name} numberOfLines={2}>{name}</Text>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
+  cardWrapper: {
+    width: '31%',
+    marginBottom: Spacing.md,
+    marginRight: Spacing.xs,
+  },
   card: {
-    width: '30%',
     backgroundColor: Colors.white,
-    borderRadius: 16,
+    borderRadius: BorderRadius.lg,
     padding: Spacing.md,
-    justifyContent: 'center',
+    paddingBottom: Spacing.md,
     alignItems: 'center',
-    margin: Spacing.xs,
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
+    overflow: 'hidden',
+    minHeight: 110,
+    justifyContent: 'center',
   },
   iconContainer: {
-    marginBottom: Spacing.sm,
-    borderRadius: 16,
-    padding: Spacing.sm,
-  },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 56,
+    height: 56,
+    borderRadius: BorderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: Spacing.sm,
   },
   name: {
-    ...Typography.caption,
+    ...Typography.captionBold,
     color: Colors.text,
-    fontWeight: '600',
     textAlign: 'center',
-    fontSize: 12,
+    fontSize: 13,
   },
 });
 

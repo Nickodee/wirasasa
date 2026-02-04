@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, BackHandler } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
-import { Colors, Spacing, Typography } from '../constants/Theme';
+import { Colors, Spacing, Typography, BorderRadius } from '../constants/Theme';
 
 export default function RoleSelectionScreen({ route, navigation }: any) {
   const { email, password } = route.params;
   const { login, user, role } = useAuth();
+  const [hoveredRole, setHoveredRole] = useState<'client' | 'provider' | null>(null);
 
   useEffect(() => {
     if (user && role) {
@@ -25,40 +27,80 @@ export default function RoleSelectionScreen({ route, navigation }: any) {
     }
   }, [user, role, navigation]);
 
-  const handleRoleSelection = async (role: 'client' | 'provider') => {
-    await login(email, password, role);
+  // Handle Android back button
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.goBack();
+        return true; // Prevent default behavior (exit app)
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => subscription.remove();
+    }, [navigation])
+  );
+
+  const handleRoleSelection = async (selectedRole: 'client' | 'provider') => {
+    await login(email, password, selectedRole);
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Select Your Role</Text>
-        <Text style={styles.subtitle}>Choose how you want to use WiraSasa</Text>
+      {/* Back Button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Ionicons name="arrow-back" size={24} color={Colors.text} />
+      </TouchableOpacity>
 
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.logo}>
+          Wira<Text style={styles.logoAccent}>Sasa</Text>
+        </Text>
+        <Text style={styles.title}>Select Your Role</Text>
+        <Text style={styles.subtitle}>How would you like to continue?</Text>
+      </View>
+
+      {/* Role Cards */}
+      <View style={styles.content}>
+        {/* Client Card */}
         <TouchableOpacity
-          style={[styles.roleCard, styles.clientCard]}
+          style={styles.roleCard}
           onPress={() => handleRoleSelection('client')}
+          activeOpacity={0.7}
         >
-          <View style={styles.iconContainer}>
-            <Ionicons name="people" size={48} color={Colors.primary} />
+          <View style={styles.cardContent}>
+            <View style={styles.iconCircle}>
+              <Ionicons name="person-outline" size={36} color={Colors.primary} />
+            </View>
+            <View style={styles.textContent}>
+              <Text style={styles.cardTitle}>I'm a Client</Text>
+              <Text style={styles.cardSubtitle}>Looking for services</Text>
+            </View>
           </View>
-          <Text style={styles.roleTitle}>Client</Text>
-          <Text style={styles.roleDescription}>
-            Find and hire skilled professionals
-          </Text>
+          <Ionicons name="arrow-forward" size={24} color={Colors.textSecondary} style={styles.arrow} />
         </TouchableOpacity>
 
+        {/* Provider Card */}
         <TouchableOpacity
-          style={[styles.roleCard, styles.providerCard]}
+          style={styles.roleCard}
           onPress={() => handleRoleSelection('provider')}
+          activeOpacity={0.7}
         >
-          <View style={styles.iconContainer}>
-            <Ionicons name="briefcase" size={48} color={Colors.secondary} />
+          <View style={styles.cardContent}>
+            <View style={styles.iconCircle}>
+              <Ionicons name="briefcase-outline" size={36} color={Colors.secondary} />
+            </View>
+            <View style={styles.textContent}>
+              <Text style={styles.cardTitle}>I'm a Provider</Text>
+              <Text style={styles.cardSubtitle}>Offering services</Text>
+            </View>
           </View>
-          <Text style={styles.roleTitle}>Service Provider</Text>
-          <Text style={styles.roleDescription}>
-            Offer your services and earn money
-          </Text>
+          <Ionicons name="arrow-forward" size={24} color={Colors.textSecondary} style={styles.arrow} />
         </TouchableOpacity>
       </View>
     </View>
@@ -70,53 +112,100 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  content: {
-    flex: 1,
+  
+  // Back Button
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: Spacing.xl,
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surface,
     justifyContent: 'center',
-    padding: Spacing.lg,
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  
+  // Header
+  header: {
+    paddingTop: 100,
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: Spacing.xxxl,
+    alignItems: 'center',
+  },
+  logo: {
+    ...Typography.h1,
+    fontSize: 28,
+    fontWeight: '700',
+    marginBottom: Spacing.xl,
+  },
+  logoAccent: {
+    color: Colors.primary,
   },
   title: {
     ...Typography.h1,
+    fontSize: 32,
     textAlign: 'center',
     marginBottom: Spacing.xs,
+    color: Colors.text,
   },
   subtitle: {
     ...Typography.body,
     textAlign: 'center',
     color: Colors.textSecondary,
-    marginBottom: Spacing.xl,
+    fontSize: 16,
   },
+  
+  // Content
+  content: {
+    flex: 1,
+    paddingHorizontal: Spacing.xl,
+    gap: Spacing.base,
+  },
+  
+  // Role Card
   roleCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: Spacing.xl,
-    marginBottom: Spacing.md,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.lg,
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    justifyContent: 'space-between',
+    minHeight: 110,
   },
-  clientCard: {
-    borderWidth: 2,
-    borderColor: Colors.primary,
+  
+  // Card Content
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.base,
+    flex: 1,
   },
-  providerCard: {
-    borderWidth: 2,
-    borderColor: Colors.secondary,
+  iconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  iconContainer: {
-    marginBottom: Spacing.md,
+  textContent: {
+    flex: 1,
   },
-  roleTitle: {
+  cardTitle: {
     ...Typography.h2,
-    marginBottom: Spacing.xs,
+    color: Colors.text,
+    fontSize: 20,
+    marginBottom: 4,
   },
-  roleDescription: {
+  cardSubtitle: {
     ...Typography.body,
     color: Colors.textSecondary,
-    textAlign: 'center',
+    fontSize: 14,
+  },
+  arrow: {
+    opacity: 0.6,
   },
 });
 

@@ -40,7 +40,7 @@ export default function App() {
   return (
     <AuthProvider>
       <JobProvider>
-        <StatusBar style="auto" />
+        <StatusBar style="dark" />
         <AppNavigator />
       </JobProvider>
     </AuthProvider>

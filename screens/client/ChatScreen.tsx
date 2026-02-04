@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '../../constants/Theme';
@@ -62,6 +63,32 @@ export default function ChatScreen({ route, navigation }: any) {
   const { provider } = route.params || {};
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState(mockMessages);
+  
+  // Hide bottom tab bar when this screen is focused
+  useEffect(() => {
+    navigation.getParent()?.setOptions({
+      tabBarStyle: { display: 'none' }
+    });
+    
+    return () => {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 30,
+          left: 0,
+          right: 0,
+          borderTopWidth: 1,
+          borderTopColor: '#E5E5E5',
+          backgroundColor: '#FFFFFF',
+          height: Platform.OS === 'ios' ? 88 : 65,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+          paddingTop: 8,
+          elevation: 0,
+          shadowOpacity: 0,
+        }
+      });
+    };
+  }, [navigation]);
   
   // Generate profile image URI for provider
   const providerImageUri = provider?.profileImage || `https://i.pravatar.cc/150?img=${provider?.id || '1'}`;
@@ -148,8 +175,11 @@ export default function ChatScreen({ route, navigation }: any) {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.messagesList}
       />
-
+      
       <View style={styles.inputContainer}>
+        <TouchableOpacity style={styles.attachButton}>
+          <Ionicons name="add-circle-outline" size={28} color={Colors.primary} />
+        </TouchableOpacity>
         <TextInput
           style={styles.input}
           placeholder="Type a message..."
@@ -158,6 +188,9 @@ export default function ChatScreen({ route, navigation }: any) {
           onChangeText={setMessage}
           multiline
         />
+        <TouchableOpacity style={styles.emojiButton}>
+          <Ionicons name="happy-outline" size={24} color={Colors.primary} />
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.sendButton}
           onPress={sendMessage}
@@ -172,7 +205,7 @@ export default function ChatScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.white,
   },
   header: {
     flexDirection: 'row',
@@ -224,6 +257,7 @@ const styles = StyleSheet.create({
   },
   messagesList: {
     padding: Spacing.md,
+    paddingBottom: 100,
   },
   messageContainer: {
     marginBottom: Spacing.md,
@@ -261,6 +295,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   inputContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
@@ -268,17 +306,25 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.border,
   },
+  attachButton: {
+    marginRight: Spacing.xs,
+    padding: 4,
+  },
   input: {
     flex: 1,
     backgroundColor: Colors.white,
     borderRadius: 24,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    marginRight: Spacing.sm,
+    marginRight: Spacing.xs,
     maxHeight: 100,
     ...Typography.body,
     borderWidth: 1,
     borderColor: Colors.border,
+  },
+  emojiButton: {
+    marginRight: Spacing.xs,
+    padding: 4,
   },
   sendButton: {
     width: 40,
