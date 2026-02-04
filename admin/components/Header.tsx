@@ -6,7 +6,11 @@ import { Bell, Menu, Moon, Sun, LogOut, User } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { logout } from '@/lib/api'
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
   const router = useRouter()
   const { theme, toggleTheme } = useTheme()
   const [showUserMenu, setShowUserMenu] = useState(false)
@@ -23,7 +27,8 @@ export default function Header() {
           <div className="flex items-center">
             <button
               type="button"
-              className="md:hidden -ml-2 p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+              onClick={onMenuClick}
+              className="md:hidden -ml-2 p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               <Menu className="h-6 w-6" />
             </button>
